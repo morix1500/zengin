@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -21,6 +22,7 @@ const (
 )
 
 var (
+	fileCnt         = 0
 	banks           = []Bank{}
 	bankKanaList    = map[string][]Bank{}
 	branches        = map[string][]Branche{}
@@ -194,22 +196,28 @@ func outputJson(dest string, data interface{}) error {
 	defer f.Close()
 
 	f.Write(b)
+	fileCnt++
 
 	return nil
 }
 
-func removeDirectory() error {
+func resetDataDirectory() error {
 	targetDir := []string{
-		"./data/bankKana/*",
-		"./data/banks/*",
-		"./data/branchKana/*",
-		"./data/branches/*",
+		"./data/bankKana",
+		"./data/banks",
+		"./data/branchKana",
+		"./data/branches",
 	}
+
 	for _, path := range targetDir {
 		if err := os.RemoveAll(path); err != nil {
 			return err
 		}
+		if err := os.Mkdir(path, 0755); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
@@ -254,41 +262,38 @@ func parse(list []string) error {
 	return nil
 }
 
-func outputFiles() (int, error) {
-	cnt := 0
-
+func outputFiles() error {
+	// output bank
 	for _, v := range banks {
 		path := fmt.Sprintf("./data/banks/%s.json", v.Code)
 		if err := outputJson(path, v); err != nil {
-			return cnt, err
+			return err
 		}
-		cnt++
 	}
 
+	// output bank kana list
+	kanaList := []string{}
 	for i, v := range bankKanaList {
 		path := fmt.Sprintf("./data/bankKana/%s.json", i)
 		if err := outputJson(path, v); err != nil {
-			return cnt, err
+			return err
 		}
-		cnt++
+		kanaList = append(kanaList, i)
+	}
+	sort.Strings(kanaList)
+	if err := outputJson("./data/bankKana/list.json", kanaList); err != nil {
+		return err
 	}
 
+	// output bank branches
 	for bankCode, list := range branches {
-		dir := fmt.Sprintf("./data/branches/%s", bankCode)
-		_, err := os.Stat(dir)
-		if err != nil {
-			os.Mkdir(dir, 0755)
-		}
-
-		for _, v := range list {
-			path := fmt.Sprintf("%s/%s.json", dir, v.Code)
-			if err := outputJson(path, v); err != nil {
-				return cnt, err
-			}
-			cnt++
+		path := fmt.Sprintf("./data/branches/%s.json", bankCode)
+		if err := outputJson(path, list); err != nil {
+			return err
 		}
 	}
 
+	// output bank branch kana list
 	for bankCode, list := range brancheKanaList {
 		dir := fmt.Sprintf("./data/branchKana/%s", bankCode)
 		_, err := os.Stat(dir)
@@ -296,16 +301,22 @@ func outputFiles() (int, error) {
 			os.Mkdir(dir, 0755)
 		}
 
+		kanaList := []string{}
 		for i, v := range list {
 			path := fmt.Sprintf("%s/%s.json", dir, i)
 			if err := outputJson(path, v); err != nil {
-				return cnt, err
+				return err
 			}
-			cnt++
+			kanaList = append(kanaList, i)
+		}
+
+		sort.Strings(kanaList)
+		if err := outputJson(dir+"/list.json", kanaList); err != nil {
+			return err
 		}
 	}
 
-	return cnt, nil
+	return nil
 }
 
 func main() {
@@ -326,14 +337,14 @@ func main() {
 		fmt.Printf("%+v\n", err)
 	}
 
-	if err := removeDirectory(); err != nil {
+	if err := resetDataDirectory(); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
 
-	cnt, err := outputFiles()
+	err = outputFiles()
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 	}
 
-	fmt.Printf("output file count: %d\n", cnt)
+	fmt.Printf("output file count: %d\n", fileCnt)
 }
