@@ -1,6 +1,9 @@
 # 銀行・支店JSON
 銀行と銀行支店情報をJSONにしたものです。  
 あいうえおごとに分類もしてあります。  
+
+データ元は[ykaku.com](http://ykaku.com)さまです。  
+
 GitHub PagesでJSONをホスティングしているのでAPIとしても利用できます。
 
 * 銀行情報
