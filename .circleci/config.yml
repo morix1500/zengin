@@ -5,17 +5,17 @@ jobs:
       - image: golang:1.12-alpine3.9
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "43:e2:77:cf:61:69:69:bf:ed:21:93:86:60:8a:a5:50"
+      - run: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
       - run: apk add --update git openssh
       - run: git checkout master
       - run: git config --global user.email rade1500@gmail.com
       - run: git config user.name "morix1500"
       - run: go run main.go
-      - run: git add .
-      - run: git commit -m "auto generate" || exit 0
-      - run: git push origin master
+      - run:
+          command: |
+            git add .
+            git commit -m "auto generate" || exit 0
+            git push origin master
 
 workflows:
   version: 2
