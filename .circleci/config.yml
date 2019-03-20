@@ -5,8 +5,8 @@ jobs:
       - image: golang:1.12-alpine3.9
     steps:
       - checkout
-      - run: go run main.go
       - run: apk add --update git
+      - run: go run main.go
       - run: git config --global user.email rade1500@gmail.com
       - run: git config user.name "morix1500"
       - run: git add .
