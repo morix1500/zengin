@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  update:
+    docker:
+      - image: golang:1.12-alpine3.9
+    steps:
+      - checkout
+      - run: go run main.go
+      - run: apk add --update git
+      - run: git config --global user.email rade1500@gmail.com
+      - run: git config user.name "morix1500"
+      - run: git add .
+      - run: git commit -m "auto generate"
+      - run: git push origin master
+
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - update
+#  workflow:
+#    triggers:
+#      - schedule:
+#          cron: "0 1 * * *"
+#          filters:
+#            branches:
+#              only:
+#                - master
+#    jobs:
+#      - update
