@@ -6,9 +6,10 @@ jobs:
     steps:
       - checkout
       - run: apk add --update git
-      - run: go run main.go
+      - run: git checkout master
       - run: git config --global user.email rade1500@gmail.com
       - run: git config user.name "morix1500"
+      - run: go run main.go
       - run: git add .
       - run: git commit -m "auto generate"
       - run: git push origin master
