@@ -11,7 +11,7 @@ jobs:
       - run: git config user.name "morix1500"
       - run: go run main.go
       - run: git add .
-      - run: git commit -m "auto generate"
+      - run: git commit -m "auto generate" || exit 0
       - run: git push origin master
 
 workflows:
