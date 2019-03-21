@@ -12,17 +12,17 @@ jobs:
       - run: git config user.name "morix1500"
       - run: go run main.go
       - run:
-      -   command: |
-      -     git add .
-      -     git commit -m "auto generate" || exit 0
-      -     git push origin master
+          command: |
+            git add .
+            git commit -m "auto generate" || exit 0
+            git push origin master
 
 workflows:
   version: 2
   workflow:
     triggers:
       - schedule:
-          cron: "0 1 * * *"
+          cron: "10 1 * * *"
           filters:
             branches:
               only:
